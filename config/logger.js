@@ -14,7 +14,7 @@ export const logger = createLogger({
             )
         }),
         new transports.File({filename:"error.log", level:'error'}),
-        new transports.File({filename:'combinbed.log'})
+        new transports.File({filename:'combined.log'})
     ]
 });
 
