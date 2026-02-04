@@ -1,0 +1,6 @@
+account related table:
+
+userID as foreign key, card details, account_id as primary key
+
+
+card details: card number, cvv, expiry, name on card

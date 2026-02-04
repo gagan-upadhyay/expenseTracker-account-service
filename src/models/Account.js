@@ -1,4 +1,5 @@
 import {db} from "../../config/db.js";
+import { pgQuery } from "../../config/db.js";
 /**
  * Create a new account
  * @param {number} userId
@@ -31,7 +32,7 @@ export async function findByUserId(userId){
     WHERE user_id=$1
     ORDER BY created_at DESC
     `;
-    const {rows} = await db(query, [userId]);
+    const {rows} = await pgQuery(query, [userId]);
     return rows;
 }
 
