@@ -11,7 +11,7 @@ import { getRedisClient } from './utils/redisConnection.js';
 
 import setupGracefulShutDown from './utils/setupGracefulShutdown.js';
 import { pool } from './config/db.js';
-import { helmetConfig } from '../expenseTracker-auth-service/config/helmet.config.js';
+import { helmetConfig } from './config/helmet.config.js';
 
 
 const app = express();
