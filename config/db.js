@@ -1,22 +1,20 @@
-import {Pool} from 'pg';
+import {Pool} from 'pg'
 import { logger } from './logger.js';
-
 export const pool = new Pool({
     connectionString:process.env.POSTGRES_URL,
     max:10,
     idleTimeoutMillis:30000,
     connectionTimeoutMillis:20000,
-   
-});
+})
 
 pool.on('error', (err)=>{
     console.error('Unexpected error on idle client:\n', err);
-    logger.error('Unexpected error on idle client:\n', err);
+    logger.error("Unexpected error on idle db client", err);
+
 })
 
-export const db = (text, params)=>pool.query(text, params);
 
-export const pgQuery = async(queryText, params=[])=>{
+const pgQuery = async(queryText, params=[])=>{
     try{
         console.log('From db, value of queryText and params=[]', queryText, params);
         const result = await pool.query(queryText, params);
@@ -28,13 +26,15 @@ export const pgQuery = async(queryText, params=[])=>{
     }
 }
 
-export const pgConnectTest = async()=>{
+const pgConnectTest = async()=>{
     try{
         await pool.connect();
         const result = await pool.query(`SELECT NOW()`);
+        // console.log("Value of resulr form auth:", result);
         logger.info(`Postgres connected. Server time:${result.rows[0].now}`)
     }catch(err){
         logger.error('Error connecting postgres:', err);
     }
 }
-// pgConnectTest();
+
+export {pgConnectTest, pgQuery};

@@ -1,33 +1,47 @@
 import express from 'express';
 import { verifySession } from '../../middleware/verifySession.js';
-import { createAccountController, getAccountByUserController, getCardDetailsController, saveCardDetailsController } from '../controllers/accountController.js';
+import 
+{ 
+    createAccountController,
+    getAccountByUserController, 
+    getAccountByIDController, 
+    saveCardDetailsController, 
+    deleteAccountController,
+    deleteCardController,
+    fetchAllCardsController,
+    getCardDetailsController
+} from '../controllers/accountController.js';
 import { logger } from '../../config/logger.js';
 // import { logger } from '../../config/logger.js';
 
 const accountRouter = express.Router();
-accountRouter.get('/', (req, res)=>{
+accountRouter.get('/accounts', (req, res)=>{
     logger.info('accountRouter get request hit');
     return res.status(200).send("Welcome to the accountRouter");
 });
 
 // /api/v1/accounts/
 
-accountRouter.get('/account-details',  verifySession, getAccountByUserController);
-accountRouter.post('/account-details', verifySession, createAccountController);
-accountRouter.post('/cards/save-card', verifySession, saveCardDetailsController);
-accountRouter.get('/cards/cards-details', verifySession, getCardDetailsController);
+accountRouter.get('/cards', verifySession, fetchAllCardsController);
+accountRouter.get('/:accountId/cards/:cardId', verifySession, getCardDetailsController);
+accountRouter.get('/:accountId', verifySession, getAccountByIDController)
+
+accountRouter.get('/',  verifySession, getAccountByUserController);
+accountRouter.post('/', verifySession, createAccountController);
+
+// accountRouter.patch('/:accountId', verifySession)
+accountRouter.delete('/:accountId', verifySession, deleteAccountController)
+
+//cards api
+accountRouter.post('/:accountId/cards', verifySession, saveCardDetailsController);
+
+
+accountRouter.delete('/:accountId/cards/:cardId', verifySession, deleteCardController)
 
 // sugggestions:
-// GET    /accounts                    (list user’s accounts)
-// POST   /accounts                    (create)
-// GET    /accounts/:accountId
-// PATCH  /accounts/:accountId
-// DELETE /accounts/:accountId         (consider soft-delete)
-// Cards (nested)
 
-// GET  /accounts/:accountId/cards
-// POST /accounts/:accountId/cards   (was /cards/save-card)
-// GET  /accounts/:accountId/cards/:cardId
+// PATCH  /accounts/:accountId
+// Cards (nested)
 // PATCH/DELETE /accounts/:accountId/cards/:cardId
 
 

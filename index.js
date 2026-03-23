@@ -11,6 +11,7 @@ import { getRedisClient } from './utils/redisConnection.js';
 
 import setupGracefulShutDown from './utils/setupGracefulShutdown.js';
 import { pool } from './config/db.js';
+import { helmetConfig } from '../expenseTracker-auth-service/config/helmet.config.js';
 
 
 const app = express();
@@ -37,6 +38,7 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(compression());
 app.use(express.json());
+app.use(helmetConfig)
 
 
 if(process.env.NODE_ENV==='development'){
@@ -55,7 +57,7 @@ app.use((err, req, res, next)=>{
 
 app.get('/', (req, res)=>{
     logger.info("Welcome route of Account-service hit!");
-    return res.status(200).send("Welcome to the account-service");
+    return res.status(200).json({message:"Welcome to the account-service"});
 })
 
 // app routes
@@ -64,15 +66,17 @@ app.use('/api/v1/accounts', accountRouter);
 
 setupHealthCheckUp(app);
 
+let server = null;
+if(process.env.NODE_ENV!=="test"){
+    const server = app.listen(process.env.PORT || 5003, "0.0.0.0", ()=>{
+        // console.log(`Account-service running at port ${process.env.PORT}`);
+        logger.info(`Account-service running at port ${process.env.PORT}`);
+    });
+    setupGracefulShutDown(server, [
+        async ()=>await getRedisClient.disconnect(),
+        async()=>await pool.end(),
+    ]);
+}
 
-const server = app.listen(process.env.PORT, ()=>{
-    console.log(`Account-service running at port ${process.env.PORT}`);
-    logger.info(`Account-service running at port ${process.env.PORT}`);
-});
 
-setupGracefulShutDown(server, [
-    async ()=>await getRedisClient.disconnect(),
-    async()=>await pool.end(),
-]);
-
-export default app;
+export {app, server};
