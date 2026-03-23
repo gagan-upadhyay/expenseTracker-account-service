@@ -26,7 +26,7 @@ export async function getAccountByUser(userId){
     ORDER BY created_at DESC
     `;
     try{
-        const {rows} = await db(query, [userId]);
+        const {rows} = await pgQuery(query, [userId]);
         console.log('Value of rows:', rows);
         return rows;
     }catch(err){
@@ -51,7 +51,7 @@ export async function createAccountService(userId, accountType, currencyCode, op
         VALUES( $1, $2, $3, $4, $5, $6)
         RETURNING id, account_type, currency_code, opening_balance, total_expense, total_income
         `;
-        const {rows} = await db(query, [userId, accountType, currencyCode, openingBalance, totalExpense, totalIncome]);
+        const {rows} = await pgQuery(query, [userId, accountType, currencyCode, openingBalance, totalExpense, totalIncome]);
         return rows[0];
 
     }catch(err){
@@ -68,7 +68,7 @@ export async function isResourceActive(accountId, cardId, userId){
         SELECT is_active FROM ${service} WHERE id=$1 AND user_id=$2
         `
         console.log('Value of query:', query);
-        const {rows} = await db(query, [accountId?accountId:cardId, userId]);
+        const {rows} = await pgQuery(query, [accountId?accountId:cardId, userId]);
         return rows[0];
     }catch(err){
         logger.error(`Error while fetching ${accountId?accountId:cardId} details: ${err}`);
@@ -86,7 +86,7 @@ export async function deleteService(accountId, cardId, userId) {
         WHERE id=$1 AND user_id=$2
         RETURNING id
         `
-        const {rows}= await db(query, [accountId?accountId:cardId, userId]);
+        const {rows}= await pgQuery(query, [accountId?accountId:cardId, userId]);
         console.log('Value of query:\n', query);
         console.log("value of rows:\n", rows);
         return rows[0];
@@ -106,7 +106,7 @@ export async function fetchAccountDetails(userId,accountId){
         FROM accounts
         WHERE id=$1 AND user_id=$2
         `
-        const {rows} = await db(query, [accountId, userId]);
+        const {rows} = await pgQuery(query, [accountId, userId]);
         return rows[0];
     }catch(err){
         logger.error(`Error while fetching account details of ${accountId}: ${err}`);
@@ -146,7 +146,7 @@ export async function saveCardDetailsService(account_id, brand, cardNumber, hold
         
         RETURNING *;
         `
-        const {rows} = await db(query, 
+        const {rows} = await pg(query, 
             [
                 userId,
                 account_id, 
@@ -180,7 +180,7 @@ export async function fetchAllCardsService(userId){
         *
         FROM cards WHERE user_id=$1 AND is_active=TRUE
         `;
-        const {rows} = await db(query, [userId]);
+        const {rows} = await pgQuery(query, [userId]);
         if(rows.length===0) return 'No data found';
         return rows;
     }catch(err){
@@ -207,7 +207,7 @@ export async function fetchCardDetailsService(accountId, userId, cardId) {
         WHERE 
         id=$1 AND account_id=$2 AND is_active=TRUE
         `;
-        const {rows} = await db(query, [cardId, accountId]);
+        const {rows} = await pgQuery(query, [cardId, accountId]);
         console.log('Value of rows:', rows);
         return rows[0];
     }catch(err){
