@@ -46,8 +46,8 @@ jobs:
                 key: ${{secrets.SERVER_SSH_KEY}}
                 script: |
                  docker pull ${{secrets.DOCKER_USERNAME}}/account-service:latest
-                 docker stop app || true
-                 docker rm app || true
-                 docker run -d --env-file /home/azureuser/app.env -p 5003:5003 --name app ${{secrets.DOCKER_USERNAME}}/account-service:latest
+                 docker stop account-service || true
+                 docker rm account-service || true
+                 docker run -d --env-file /home/azureuser/account.env -p 5003:5003 --name account-service ${{secrets.DOCKER_USERNAME}}/account-service:latest
 
 
