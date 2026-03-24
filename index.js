@@ -17,7 +17,12 @@ import { helmetConfig } from './config/helmet.config.js';
 const app = express();
 
 const corsOptions={
-    origin:['http://localhost:3000', 'https://expense-tracker-git-newbranch-gagans-projects-00cb1a77.vercel.app', 'http://192.168.0.126:3000',  'expense-tracker-self-rho-12.vercel.app', 'expense-tracker-gagans-projects-00cb1a77.vercel.app'],
+    origin:[
+        'http://localhost:3000',
+        'https://expense-tracker-git-newbranch-gagans-projects-00cb1a77.vercel.app',
+        'http://192.168.0.126:3000',
+        'https://expense-tracker-self-rho-12.vercel.app',
+        'https://expense-tracker-gagans-projects-00cb1a77.vercel.app'],
     credentials:true
 };
 // const corsOptions = {
