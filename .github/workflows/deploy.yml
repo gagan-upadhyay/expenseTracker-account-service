@@ -49,5 +49,3 @@ jobs:
                  docker stop account-service || true
                  docker rm account-service || true
                  docker run -d --env-file /home/azureuser/account.env -p 5003:5003 --restart unless-stopped --name account-service ${{secrets.DOCKER_USERNAME}}/account-service:latest
-
-
