@@ -27,15 +27,16 @@ accountRouter.get('/:accountId/cards/:cardId', verifySession, getCardDetailsCont
 accountRouter.get('/:accountId', verifySession, getAccountByIDController)
 
 accountRouter.get('/',  verifySession, getAccountByUserController);
+
 accountRouter.post('/', verifySession, createAccountController);
+
+// accountRouter.post('/accounts-with-cards', verifySession, createAccountCardController);
 
 // accountRouter.patch('/:accountId', verifySession)
 accountRouter.delete('/:accountId', verifySession, deleteAccountController)
 
 //cards api
-accountRouter.post('/:accountId/cards', verifySession, saveCardDetailsController);
-
-
+// accountRouter.post('/:accountId/cards', verifySession, saveCardDetailsController);
 accountRouter.delete('/:accountId/cards/:cardId', verifySession, deleteCardController)
 
 // sugggestions:

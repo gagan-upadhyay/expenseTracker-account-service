@@ -1,3 +1,4 @@
+// import { error } from "winston";
 import { logger } from "../../config/logger.js";
 import { checkResourceStatus } from "../helpers/checkResourceStatus.js";
 import { createAccountService,
@@ -32,7 +33,7 @@ export async function createAccountController(req, res) {
         if(!result){
             logger.error("Unable to fill account table",result);
             return res.status(404).json({success:false, 
-                message: "Unable to fill account table, check inputs",   
+                error: "Unable to fill account table, check inputs",   
             });
         }
         logger.info(`User's ${req.user.id} account details are successfully stored`, result);
@@ -41,7 +42,7 @@ export async function createAccountController(req, res) {
 
     }catch(err) {
         logger.error(`Error at create Account controller for user ${req.user.id}`, err);
-        return res.status(500).json({success:false, message:'Something went wrong! please try again later'})
+        return res.status(500).json({success:false, error:'Something went wrong! please try again later'})
     }
 }
 //--------------------------------------------------------------------------------------------
@@ -55,13 +56,13 @@ export async function getAccountByUserController(req, res){
         
         if(!userExists){
             logger.error("user details not found in the accounts table", userExists);
-            return res.status(404).json({success:false, message:'user details not found in the accounts table'});
+            return res.status(404).json({success:false, error:'user details not found'});
         }
         logger.info("Successfully fetched the details", userExists);
         return res.status(200).json({success:true, message:'Fetched successfully', data:userExists});
     }catch(err){
         logger.error("Error while fetching account details", err);
-        return res.status(500).json({success:false, message:'Failed to fetch the accounts details at the moment, please try again later'});
+        return res.status(500).json({success:false, error:'Failed to fetch the accounts details at the moment, please try again later'});
     }
 }
 
@@ -76,17 +77,17 @@ export async function getAccountByIDController(req, res){
         // await checkResourceStatus(res, accountId, null, userId, 'account')
 
         const {ok, code, message} = await checkResourceStatus({accountId, cardId:null, userId, flag:'accounts'});
-        if(!ok) return res.status(code).json({success:false, message});
+        if(!ok) return res.status(code).json({success:false, error:message});
 
         const accountDetails = await fetchAccountDetails(userId, accountId);
         if(accountDetails?.error){
             return res.status(400).json({success:false, message:'Unable to get account details', error:error});
-        }else if(!accountDetails) return res.status(403).json({success:false, message:'Back off!!'})
+        }else if(!accountDetails) return res.status(403).json({success:false, message:'Back off!!', error:'Illegal use of API'})
         return res.status(200).json({success:true, message:'Account deatils fetched successfully!', data:accountDetails});
 
     }catch(err){
         console.error(`Error while fetching account:${err}`);
-        return res.status(500).json({message:'Something went wrong, please try again later!'});
+        return res.status(500).json({success:false, error:'Something went wrong, please try again later!'});
     }
 }
 //--------------------------------------------------------------------------------------------
@@ -102,13 +103,13 @@ export async function deleteAccountController(req, res){
         if(!ok) return res.status(code).json({success:false, message});
         const result = await deleteService( accountId, null, userId);
         if(result==='!userId'){
-            return res.status(401).json({success:false, message:'Illegal use of API!'});
+            return res.status(401).json({success:false, error:'Illegal use of API!'});
         }else if(result){
             return res.status(200).json({success:true, message:'Account deleted successfully!'});
         }
     }catch(err){
         console.error(`Error while deleting account:${err}`);
-        return res.status(500).json({success:false, message:'Something went wrong, please try again later!'});
+        return res.status(500).json({success:false, error:'Something went wrong, please try again later!'});
     }
 }
 
@@ -118,7 +119,7 @@ export async function deleteAccountController(req, res){
 //create card and associating with the accountId and userId
 
 export async function saveCardDetailsController(req, res){
-    if(!req.user.id) return res.status(400).json({message:'User is not logged in'});
+    if(!req.user.id) return res.status(400).json({success:false, error:'User is not logged in'});
     try{
 
         const {brand, cardNumber, holder_name, expiry_month, expiry_year, is_active} = req.body;
@@ -129,15 +130,15 @@ export async function saveCardDetailsController(req, res){
         console.log('Value of response.error boolean:', Boolean(response.error));
         if(response.error){ 
             logger.error(`Error while saving card details for user: ${req.user.id}`, response.error);
-            return res.status(400).json({message:'Error while saving card details', error:response.error.message});
+            return res.status(400).json({success:false, error:'Error while saving card details', error:response.error.message});
         }
-        return res.status(201).json({message:`Card details added for user: ${req.user.id}`});
+        return res.status(201).json({success:true, message:`Card details added for user: ${req.user.id}`});
 
 
 
     }catch(err){
         console.error(`Error at saveCardDetails controller for user ${req.user.id}:\n`, err);
-        return res.status(500).json({message:'Something went wrong! please try again later'})
+        return res.status(500).json({success:false, error:'Something went wrong! please try again later'})
     }
 }
 // -------------------------------------------------------------------------------------------------
@@ -146,12 +147,12 @@ export async function saveCardDetailsController(req, res){
 
 export async function fetchAllCardsController(req, res){
     console.log('-----------Inside fetchAllCards----');
-    if(!req.user.id) return res.status(400).json({success:false, message:'User is not allowed'});
+    if(!req.user.id) return res.status(400).json({success:false, error:'User is not allowed'});
     // const {accountId} = req.params;
     try{
         const result = await fetchAllCardsService(req.user.id);
         console.log('Value of data from fetchAllCaard:', result);
-        if(result ==='No data found') return res.status(404).json({success:false, message:'No data found'});
+        if(result ==='No data found') return res.status(404).json({success:false, error:'No data found'});
         if(result.error){
             return res.status(400).json({success:false, err:result.error});
         }
@@ -161,7 +162,7 @@ export async function fetchAllCardsController(req, res){
 
     }catch(err){
         console.error(`Error at getCardDetails controller for user ${req.user.id}:\n`, err);
-        return res.status(500).json({message:'Something went wrong! please try again later'})
+        return res.status(500).json({success:false, error:'Something went wrong! please try again later'})
         
     }
 }
@@ -169,18 +170,19 @@ export async function fetchAllCardsController(req, res){
 //fetched card details of single card linked with :accountId
 
 export async function getCardDetailsController(req, res) {
-    if(!req.user?.id) return res.status(400).json({success:false, message:'User is not allowed'});
+    if(!req.user?.id) return res.status(400).json({success:false, error:'User is not allowed'});
 
     const userId = req.user.id;
     const {cardId, accountId} = req.params;
     // await checkResourceStatus(res, null, cardId, req.user.id, 'card');
     const {ok, code, message} = await checkResourceStatus({accountId:null, cardId, userId, flag:'card'});
-        if(!ok) return res.status(code).json({success:false, message});
+        if(!ok) return res.status(code).json({success:false, error:message});
 
     const result = await fetchCardDetailsService(accountId, userId, cardId);
+    // console.log('Value of result:', result);
 
     if(!result){
-        return res.status(404).json({success:false, message:'Back off!!'});
+        return res.status(404).json({success:false, message:'Back off!!', error:'Illegal use of API'});
     }
     
     if(result?.error){
@@ -196,7 +198,7 @@ export async function getCardDetailsController(req, res) {
 //deleting card
 
 export async function deleteCardController(req, res){
-    if(!req.user.id) return res.status(400).json({success:false, message:'User is not allowed'});
+    if(!req.user.id) return res.status(400).json({success:false, error:'User is not allowed'});
     const {cardId, accountId} = req.params;
     const userId = req.user.id;
 
@@ -224,3 +226,17 @@ export async function deleteCardController(req, res){
         return res.status(500).json({success:false, message:'Something went wrong! Please try again later.'});
     }
 }
+
+
+
+// export async function createAccountAddCardController(req, res){
+//     const {account, cards} = req.body();
+
+//     if (!req.user.id) return res.status(400).json({success:false,});
+//     const userId = req.user.id;
+
+//     if(!account){
+
+
+//     }
+// }
