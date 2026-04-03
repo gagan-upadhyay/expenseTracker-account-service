@@ -36,7 +36,7 @@ accountRouter.post('/', verifySession, createAccountController);
 accountRouter.delete('/:accountId', verifySession, deleteAccountController)
 
 //cards api
-// accountRouter.post('/:accountId/cards', verifySession, saveCardDetailsController);
+accountRouter.post('/:accountId/cards', verifySession, saveCardDetailsController);
 accountRouter.delete('/:accountId/cards/:cardId', verifySession, deleteCardController)
 
 // sugggestions:
