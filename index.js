@@ -32,11 +32,18 @@ app.use(compression());
 app.use(express.json());
 app.use(helmetConfig)
 
+const morganFormat = process.env.NODE_ENV==='production'?'combined':'dev';
 
 if(process.env.NODE_ENV==='development'){
-    app.use(morgan('dev'));
-    // app.use(cors(corsOptions))
+    app.use(cors(corsOptions))
+}else{
 }
+
+app.use(morgan(morganFormat,{
+    stream:{
+        write:(message)=>logger.info(message.trim(), {context:'HTTP'})
+    }
+}));
 
 //midddleware
 //application level error catcher:
