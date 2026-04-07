@@ -10,7 +10,8 @@ export const logger = createLogger({
         new transports.Console({
             format:format.combine(
                 format.colorize(),
-                format.simple()
+                format.simple(),
+                format.json()
             )
         }),
         new transports.File({filename:"error.log", level:'error'}),
