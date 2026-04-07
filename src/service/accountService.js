@@ -43,7 +43,7 @@ export async function createAccountService(userId, accountType, currencyCode, op
         logger.warn('createAccountData called without userId');
         return null;
     }
-    console.log(userId, accountType, currencyCode, openingBalance, totalExpense, totalIncome);
+    console.log("from accountService:",userId, accountType, currencyCode, openingBalance, totalExpense, totalIncome);
 
     try{
         const query = `
@@ -134,27 +134,28 @@ export async function fetchAccountDetails(userId,accountId){
 //--------------Card Services--------------------------
 
 //need to match the userId and accountId
-export async function saveCardDetailsService(account_id, brand, cardNumber, holder_name, expiry_month, expiry_year, userId){
+export async function saveCardDetailsService(account_id, brand, cardnumber, holder_name, expiry_month, expiry_year, userId, card_type){
     if(!userId){
         logger.warn('saveCardDetailsService called without userId');
         return null;
     }
     try{
         const query =`
-        INSERT INTO cards (user_id, account_id, brand, cardnumber, holder_name, expiry_month, expiry_year)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO cards (user_id, account_id, brand, cardnumber, holder_name, expiry_month, expiry_year, card_type)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         
         RETURNING *;
         `
-        const {rows} = await pg(query, 
+        const {rows} = await pgQuery(query, 
             [
                 userId,
                 account_id, 
                 brand, 
-                cardNumber, 
+                cardnumber, 
                 holder_name, 
                 expiry_month, 
-                expiry_year, 
+                expiry_year,
+                card_type,
             ]
         )
 
