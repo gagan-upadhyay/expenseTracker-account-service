@@ -15,6 +15,9 @@ import { createAccountService,
 //----------------------------------------------------
 const getLogContext =(req, context)=> ({
     context: context, 
+    route:req.OriginalUrl,
+    method:req.method,
+    status:req.statusCode,
     userId: req.user?.id, 
     accountId: req.params.id, 
     requestId: req.headers['x-request-id']

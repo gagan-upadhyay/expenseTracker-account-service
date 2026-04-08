@@ -36,7 +36,6 @@ const morganFormat = process.env.NODE_ENV==='production'?'combined':'dev';
 
 if(process.env.NODE_ENV==='development'){
     app.use(cors(corsOptions))
-}else{
 }
 
 app.use(morgan(morganFormat,{
