@@ -34,10 +34,10 @@ export async function createAccountController(req, res) {
         const result = await createAccountService(
             (req.user.id),
             accountType, //string
-            (currencyCode), //string
-            (openingBalance), //number
-            (totalExpense), //number 
-            (totalIncome) //number
+            currencyCode, //string
+            openingBalance, //number
+            totalExpense, //number 
+            totalIncome //number
         );
         
         if(!result){
@@ -48,7 +48,7 @@ export async function createAccountController(req, res) {
         }
         logger.info(`Account created successfully`, {...logDetails, accountId:result.id});
         
-        return res.status(201).json({success:true, message:"User's account details are successfully stored"});
+        return res.status(201).json({success:true, message:"User's account details are successfully stored", id:result.id});
 
     }catch(err) {
         logger.error("Unable to fill account table", {...logDetails, error:err.message, stack:err.stack});
@@ -146,6 +146,7 @@ export async function deleteAccountController(req, res){
 //create card and associating with the accountId and userId
 
 export async function saveCardDetailsController(req, res){
+    console.log('-----------------Inside savecard----------------');
     const logDetails= getLogContext(req, "CardService:SaveCard");
     
     if(!req.user.id) return res.status(400).json({success:false, error:'User is not logged in'});
@@ -154,17 +155,13 @@ export async function saveCardDetailsController(req, res){
         const {brand, cardnumber, holder_name, expiry_month, expiry_year, type} = req.body;
         const {accountId} = req.params;
         const response = await saveCardDetailsService(accountId, brand, cardnumber, holder_name, expiry_month, expiry_year, req.user.id, type);
-
+        console.log('------------------value of response in save card details-----------------\n', response);
         if(response.error){ 
             logger.error(`Error while saving card details`, {...logDetails, error:response.error.message});
             return res.status(400).json({success:false, error:'Error while saving card details', error:response.error.message});
         }
         logger.info("Card details saved successfully", logDetails);
         return res.status(201).json({success:true, message:`Card details added for user: ${req.user.id}`});
-
-
-
-
     }catch(err){
         logger.error("Critical error in saveCardDetails", { ...logDetails, error: err.message, stack: err.stack });
         return res.status(500).json({success:false, error:'Something went wrong! please try again later'})
@@ -181,7 +178,7 @@ export async function fetchAllCardsController(req, res){
     // const {accountId} = req.params;
     try{
         const result = await fetchAllCardsService(req.user.id);
-        console.log('Value of data from fetchAllCaard:', result);
+        console.log('--------------Value of data from fetchAllCaard-------------------:\n', result);
         if(result ==='No data found') {
             logger.info("No cards found for user", logDetails);
             return res.status(404).json({success:false, error:'No data found'});}

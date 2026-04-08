@@ -182,7 +182,7 @@ export async function fetchAllCardsService(userId){
         FROM cards WHERE user_id=$1 AND is_active=TRUE
         `;
         const {rows} = await pgQuery(query, [userId]);
-        if(rows.length===0) return 'No data found';
+        // if(rows.length===0) return 'No data found';
         return rows;
     }catch(err){
         logger.error(`Error while fetching All Card details of ${userId}:\n`, err);
