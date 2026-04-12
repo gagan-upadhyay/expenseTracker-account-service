@@ -19,7 +19,8 @@ export async function getAccountByUser(userId){
     opening_balance,
     total_income,
     total_expense,
-    remaining_balance
+    remaining_balance,
+    is_liability
 
     FROM accounts
     WHERE user_id=$1 AND is_active=TRUE
@@ -102,7 +103,7 @@ export async function fetchAccountDetails(userId,accountId){
     if(!userId) return false;
     try{
         const query=`
-        SELECT currency_code, opening_balance, total_income, total_expense, remaining_balance
+        SELECT currency_code, opening_balance, total_income, total_expense, remaining_balance, is_liability
         FROM accounts
         WHERE id=$1 AND user_id=$2
         `

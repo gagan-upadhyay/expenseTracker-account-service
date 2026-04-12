@@ -1,4 +1,4 @@
-import {db} from "../../config/db.js";
+// import {db} from "../../config/db.js";
 import { pgQuery } from "../../config/db.js";
 /**
  * Create a new account
@@ -27,9 +27,9 @@ export async function create(userId, accountType, balance=0.0){
 
 export async function findByUserId(userId){
     const query=`
-    SELECT id, account_type, balance, created_at
+    SELECT *
     FROM accounts
-    WHERE user_id=$1
+    WHERE user_id=$1 AND is_active=true
     ORDER BY created_at DESC
     `;
     const {rows} = await pgQuery(query, [userId]);

@@ -9,7 +9,10 @@ import
     deleteAccountController,
     deleteCardController,
     fetchAllCardsController,
-    getCardDetailsController
+    getCardDetailsController,
+    fetchAllAccounts,
+    // updateAccountController,
+    adjustAccountBalance
 } from '../controllers/accountController.js';
 import { logger } from '../../config/logger.js';
 // import { logger } from '../../config/logger.js';
@@ -26,14 +29,15 @@ accountRouter.get('/cards', verifySession, fetchAllCardsController);
 accountRouter.get('/:accountId/cards/:cardId', verifySession, getCardDetailsController);
 accountRouter.get('/:accountId', verifySession, getAccountByIDController)
 
-accountRouter.get('/',  verifySession, getAccountByUserController);
-
+accountRouter.get('/',  verifySession, fetchAllAccounts);
 accountRouter.post('/', verifySession, createAccountController);
 
-// accountRouter.post('/accounts-with-cards', verifySession, createAccountCardController);
 
-// accountRouter.patch('/:accountId', verifySession)
+// accountRouter.patch('/:accountId', verifySession, updateAccountController);
 accountRouter.delete('/:accountId', verifySession, deleteAccountController)
+
+accountRouter.patch('/:accountId/adjust', verifySession, adjustAccountBalance);
+
 
 //cards api
 accountRouter.post('/:accountId/cards', verifySession, saveCardDetailsController);
