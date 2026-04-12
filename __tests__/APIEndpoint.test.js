@@ -47,7 +47,7 @@ jest.unstable_mockModule("../utils/redisConnection.js", () => ({
 // ---- Mock account service functions ---- //
 jest.unstable_mockModule("../src/service/accountService.js", () => ({
   createAccountService: jest.fn(async () => true),
-  getAccountByUser: jest.fn(async () => [{ id: "acc-1" }]),
+  getAccountByUser: jest.fn(async () => [{ id: "acc-1", balance:1000, account_type:'SAVINGS', currency:'INR' }]),
   fetchAccountDetails: jest.fn(async () => ({ id: "acc-1" })),
   fetchAllCardsService: jest.fn(async () => [{ card: "visa" }]),
   fetchCardDetailsService: jest.fn(async () => ({ cardId: "card-1" })),
