@@ -86,17 +86,20 @@ describe("Account Service API", () => {
   });
 
   // ---- 2. GET /api/v1/accounts ---- //
-  it("GET /api/v1/accounts should return user accounts", async () => {
-    const res = await request(app).get("/api/v1/accounts/");
+it("GET /api/v1/accounts should return user accounts", async () => {
+  const res = await request(app).get("/api/v1/accounts/");
 
-    expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    
-    // Check if accounts exists and has at least one item before checking ID
-    expect(res.body.accounts).toBeDefined();
-    expect(res.body.accounts.length).toBe(0); 
-    // expect(res.body.accounts[0].id).toBe("acc-1");
-  });
+  // If it's still 500, log res.body to see the actual error message
+  if (res.status === 500) console.log(res.body);
+
+  expect(res.status).toBe(200);
+  expect(res.body.success).toBe(true);
+  
+  // Based on your previous error, totals are likely calculated from the accounts
+  expect(res.body).toHaveProperty("totals");
+  expect(Array.isArray(res.body.accounts)).toBe(true);
+});
+
 
   // ---- 3. POST /api/v1/accounts ---- //
   it("POST /api/v1/accounts should create account", async () => {
