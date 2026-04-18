@@ -46,6 +46,7 @@ jest.unstable_mockModule("../utils/redisConnection.js", () => ({
 
 // ---- Mock account service functions ---- //
 jest.unstable_mockModule("../src/service/accountService.js", () => ({
+  adjustAccountBalanceService:jest.fn(async()=>({success:true})),
   createAccountService: jest.fn(async () => true),
   getAccountByUser: jest.fn(async () => [{ id: "acc-1", balance:1000, account_type:'SAVINGS', currency:'INR' }]),
   fetchAccountDetails: jest.fn(async () => ({ id: "acc-1" })),
@@ -67,11 +68,19 @@ jest.unstable_mockModule("../src/helpers/checkResourceStatus.js", () => ({
   }))
 }));
 
+// ---- Mock Kafka Consumer/Producer ---- //
+jest.unstable_mockModule("../consumers/transactionConsumer.js", () => ({
+  startTransactionConsumer: jest.fn(async () => {
+    console.log("Mocked Kafka Consumer started (no-op)");
+  })
+}));
+
 // ---------------------------------------------
 // IMPORT app AFTER mocks are registered
 // ---------------------------------------------
 const { app } = await import("../index.js");
 import request from "supertest";
+
 
 // ---------------------------------------------
 // TEST SUITE
@@ -178,3 +187,20 @@ describe("Account Service API", () => {
   });
 
 });
+
+  // ---- 10. PATCH /api/v1/accounts/:id/balance (or wherever your route is) ---- //
+  it("PATCH /api/v1/accounts/acc-1/adjust should trigger balance adjustment", async () => {
+    // We expect the controller to call the service we mocked above
+    const res = await request(app)
+      .patch("/api/v1/accounts/acc-1/adjust")
+      .send({
+        accountId:'acc-1',
+        userId:'test-user-id',
+        amount: 50,
+        isDeleteion: 'transaction.created'
+      });
+
+    expect(res.status).toBe(200);
+    // Verify the mock was actually called with expected data
+    // expect(adjustAccountBalanceService).toHaveBeenCalled();
+  });

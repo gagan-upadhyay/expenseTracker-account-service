@@ -55,8 +55,9 @@ app.use((err, req, res, next)=>{
     next();
 });
 
-startTransactionConsumer();
-
+if(process.env.NODE_ENV!=='test')
+{startTransactionConsumer();
+}
 app.get('/', (req, res)=>{
     logger.info("Welcome route of Account-service hit!");
     return res.status(200).json({message:"Welcome to the account-service"});

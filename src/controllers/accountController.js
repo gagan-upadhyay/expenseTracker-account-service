@@ -4,7 +4,9 @@ import { logger } from "../../config/logger.js";
 // import { convertCurrency } from "../../utils/currencyUtility.js";
 import { checkResourceStatus } from "../helpers/checkResourceStatus.js";
 import { findByUserId } from "../models/Account.js";
-import { adjustAccountBalanceService, createAccountService,
+import {
+    adjustAccountBalanceService, 
+    createAccountService,
     deleteService,
     fetchAccountDetails,
     fetchAllCardsService,
