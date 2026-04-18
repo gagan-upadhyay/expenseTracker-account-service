@@ -4,7 +4,7 @@ import { logger } from "../../config/logger.js";
 // import { convertCurrency } from "../../utils/currencyUtility.js";
 import { checkResourceStatus } from "../helpers/checkResourceStatus.js";
 import { findByUserId } from "../models/Account.js";
-import { createAccountService,
+import { adjustAccountBalanceService, createAccountService,
     deleteService,
     fetchAccountDetails,
     fetchAllCardsService,
@@ -35,26 +35,31 @@ export async function fetchAllAccounts(req, res) {
     const logDetails = getLogContext(req, "AccountService:fetchAllAccounts");
     try {
         const userId = req.user.id;
+        console.log('value of base_currency:', req.query.base_currency);
         const targetCurrency = req.query.base_currency || 'INR'; // Fallback to INR
 
         const accounts = await findByUserId(userId);
         // console.log('value of accounts:',accounts);
 
         const rates = await getExchangeRates();
+        console.log('Value of ExchangeRates:', rates);
 
         let totalBalance = 0;
         let totalIncome = 0;
         let totalExpense = 0;
 
         const processedAccounts = accounts.map(acc => {
+            console.log('Value of processign account:', acc);
             const balance = Number(acc.remaining_balance);
             const income = Number(acc.total_income);
             const expense = Number(acc.total_expense);
 
             // Convert everything to the base_currency for the totals
-            const convertedBalance = convertValue(balance, acc.currency_code, targetCurrency, rates);
-            const convertedIncome = convertValue(income, acc.currency_code, targetCurrency, rates);
-            const convertedExpense = convertValue(expense, acc.currency_code, targetCurrency, rates);
+            const convertedBalance = convertValue(balance, acc.currency_code.toUpperCase(), targetCurrency, rates);
+            const convertedIncome = convertValue(income, acc.currency_code.toUpperCase(), targetCurrency, rates);
+            const convertedExpense = convertValue(expense, acc.currency_code.toUpperCase(), targetCurrency, rates);
+            console.log('Value of converted amounts:', convertedBalance, convertedIncome, convertedExpense);
+
 
             // Logic: Liability reduces the total net worth
             if (acc.is_liability) {
@@ -66,12 +71,15 @@ export async function fetchAllAccounts(req, res) {
             totalIncome += convertedIncome;
             totalExpense += convertedExpense;
 
+            console.log('Value of totals:', totalBalance, totalExpense, totalIncome);
+
             return acc; // Keep original account data for the card display
         });
         console.log('value of processedAccounts:', processedAccounts);
-        console.log('value of totals:', totalBalance.toFixed(2), totalIncome, totalExpense);
+        
         res.json({
             success: true,
+            accounts: processedAccounts??accounts,
             accounts: processedAccounts??accounts,
             totals: {
                 netWorth: totalBalance.toFixed(2),
@@ -177,58 +185,26 @@ export async function getAccountByIDController(req, res){
 }
 //--------------------------------------------------------------------------------------------
 
+
+
+
 export async function adjustAccountBalance(req, res) {
+  try {
     const { accountId } = req.params;
     const { amount, userId, isDeletion } = req.body;
 
-    try {
-        await knexDB.transaction(async (trx) => {
-            const account = await trx('accounts')
-                .where({ id: accountId, user_id: userId })
-                .forUpdate().first(); // Re-added forUpdate for safety
+    await adjustAccountBalanceService({
+      accountId,
+      userId,
+      amount,
+      isDeletion,
+    });
 
-            if (!account) throw new Error("Account not found");
-
-            const change = Number(amount);
-            const absChange = Math.abs(change);
-            
-            // 🔥 IMPORTANT: We do NOT include remaining_balance here.
-            // The DB handles it automatically based on these two:
-            let updatePayload = {};
-
-            if (change < 0) {
-                if (isDeletion) {
-                    // Deleting Income (Credit)
-                    updatePayload.total_income = Number(account.total_income) - absChange;
-                } else {
-                    // Adding Expense (Debit)
-                    updatePayload.total_expense = Number(account.total_expense) + absChange;
-                }
-            } else {
-                if (isDeletion) {
-                    // Deleting Expense (Debit)
-                    updatePayload.total_expense = Number(account.total_expense) - absChange;
-                } else {
-                    // Adding Income (Credit)
-                    updatePayload.total_income = Number(account.total_income) + absChange;
-                }
-            }
-
-            console.log('Updating source columns:', updatePayload);
-
-            await trx('accounts')
-                .where({ id: accountId })
-                .update(updatePayload);
-        });
-
-        res.json({ success: true, message: "Source columns updated, balance recalculated by DB" });
-    } catch (err) {
-        console.error("❌ DB Update Error:", err.message);
-        res.status(500).json({ success: false, error: err.message });
-    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
-
-
 
 //---------------------------------------------------------
 export async function deleteAccountController(req, res){

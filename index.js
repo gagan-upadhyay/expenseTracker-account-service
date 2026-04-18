@@ -12,6 +12,8 @@ import { getRedisClient } from './utils/redisConnection.js';
 import setupGracefulShutDown from './utils/setupGracefulShutdown.js';
 import { pool } from './config/db.js';
 import { helmetConfig } from './config/helmet.config.js';
+import { startTransactionConsumer } from './consumers/transactionConsumer.js';
+// import { startTransactionConsumer } from './consumers/transactionConsumer.js';
 
 
 const app = express();
@@ -30,7 +32,7 @@ const corsOptions={
 app.use(cookieParser());
 app.use(compression());
 app.use(express.json());
-app.use(helmetConfig)
+app.use(helmetConfig);
 
 const morganFormat = process.env.NODE_ENV==='production'?'combined':'dev';
 
@@ -53,6 +55,7 @@ app.use((err, req, res, next)=>{
     next();
 });
 
+startTransactionConsumer();
 
 app.get('/', (req, res)=>{
     logger.info("Welcome route of Account-service hit!");
@@ -69,6 +72,7 @@ let server = null;
 if(process.env.NODE_ENV!=="test"){
     const server = app.listen(process.env.PORT || 5003, "0.0.0.0", ()=>{
         // console.log(`Account-service running at port ${process.env.PORT}`);
+        
         logger.info(`Account-service running at port ${process.env.PORT}`);
     });
     setupGracefulShutDown(server, [

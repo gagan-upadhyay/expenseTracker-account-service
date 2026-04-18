@@ -1,5 +1,6 @@
 // import { faker } from "@faker-js/faker";
 import {  pgQuery } from "../../config/db.js";
+import { knexDB } from "../../config/knex.js";
 import { logger } from "../../config/logger.js";
 // import {v4 as uuidv4} from 'uuid';
 
@@ -115,22 +116,6 @@ export async function fetchAccountDetails(userId,accountId){
     }
 }
 
-// export async function updateAccountService(){
-//     if(!userId){
-//         logger.warn('userId is required');
-//         return '!userId';
-//     }
-//     try{
-//         const query=`
-         
-//         `
-
-//     }catch(err){
-//         logger.info(`Error while deleting ${accountId}: ${err}`);
-//         return {error:err}
-//     }
-// }
-
 
 //--------------Card Services--------------------------
 
@@ -218,3 +203,48 @@ export async function fetchCardDetailsService(accountId, userId, cardId) {
     }
 }
 
+//Adjust account details as per transactions:
+// services/accountService.js
+
+export async function adjustAccountBalanceService({
+  accountId,
+  userId,
+  amount,
+  eventType,
+}) {
+  return knexDB.transaction(async (trx) => {
+    const account = await trx("accounts")
+      .where({ id: accountId, user_id: userId })
+      .forUpdate()
+      .first();
+
+    if (!account) throw new Error("Account not found");
+
+    const change = Number(amount);
+    const absChange = Math.abs(change);
+
+    let updatePayload = {};
+
+    if (change < 0) {
+      if (eventType==='transaction.deleted') {
+        updatePayload.total_income =
+          Number(account.total_income) - absChange;
+      } else {
+        updatePayload.total_expense =
+          Number(account.total_expense) + absChange;
+      }
+    } else {
+      if (eventType==='transaction.deleted') {
+        updatePayload.total_expense =
+          Number(account.total_expense) - absChange;
+      } else {
+        updatePayload.total_income =
+          Number(account.total_income) + absChange;
+      }
+    }
+
+    await trx("accounts")
+      .where({ id: accountId })
+      .update(updatePayload);
+  });
+}

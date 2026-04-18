@@ -16,6 +16,7 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "@azure/event-hubs": "^6.0.3",
     "@dotenvx/dotenvx": "^1.48.4",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
@@ -24,6 +25,7 @@
     "express-validator": "^7.3.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "kafkajs": "^2.2.4",
     "knex": "^3.2.9",
     "morgan": "^1.10.1",
     "pg": "^8.16.3",
